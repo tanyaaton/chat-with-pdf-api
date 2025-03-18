@@ -28,15 +28,16 @@ def find_answer(question, collection, embeddings):
     return hits
 
 
-def generate_prompt_gemini(question, context):
+def generate_prompt_gemini(question, context, conversation_history):
     output = f"""You are a helpful, respectful assistant that helps answer questions about research paper. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.
 
-You will receive information from research papers, a QUESTION from user, and a PREVIOUS CONVERSATION in the following section. You will need to answer the QUESTION using the information from the RESEARCH PAPERS. Explain your reasoning. If the question is not within the provided research paper, please answer "I don't know the answer, it is not part of the provided documents.
+You will receive in the following section, information from research papers, a QUESTION from user, and PREVIOUS CONVERSATION which contain past user's questions and your generated answers. You will need to answer the QUESTION using the information from the RESEARCH PAPERS. Explain your reasoning. If the question is not within the provided research paper, please answer answer with your knowleadge but also specify that it is not part of the provided documents.
 
 RESEARCH PAPERS:
 {context}
 
 PREVIOUS CONVERSATION:
+{conversation_history}
 
 QUESTION: {question}
 
@@ -50,11 +51,11 @@ def generate_answer(gemini_client, prompt):
     )
     return response.text
 
-def get_answer_from_docs(question, collection_name, history=None):
+def get_answer_from_docs(question, collection_name, conversation_history=None):
     collection = Collection(name=collection_name)
     hits = find_answer(question, collection, embeddings)
     top_5_chunks = [hits[0][i].text for i in range(5)]
-    prompt = generate_prompt_gemini(question, top_5_chunks)
+    prompt = generate_prompt_gemini(question, top_5_chunks, conversation_history)
     response = generate_answer(client, prompt)
     return response, top_5_chunks
 

@@ -74,10 +74,11 @@ def initiate_collection_name():
     print('collection_name: ', collection_name)
     return collection_name
 
-def ingest_directory(directory):
-    collection_name = initiate_collection_name()
+def ingest_directory(directory, collection_name=None):
+    if collection_name is None:
+        collection_name = initiate_collection_name()
     create_milvus_db(collection_name)
-    print('created collection')
+    print('collection name: ', collection_name)
 
     file_count = 0
     total_chunks = 0

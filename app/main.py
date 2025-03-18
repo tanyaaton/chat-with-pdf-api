@@ -17,17 +17,19 @@ connections.connect("default", host="standalone", port="19530")
 class IngestRequest(BaseModel):
     file_path: str
     is_directory: bool = False
+    collection_name: str = None
 
 class QuestionRequest(BaseModel):
     question: str
     collection_name: str = None
+    # llm_model: str = "gemini-2.0-flash"
     
 # API endpoints
 @app.post("/ingest")
 async def ingest_endpoint(request: IngestRequest):
     try:
         if request.is_directory:
-            collection_name, file_count, total_chunks = ingest_directory(request.file_path)
+            collection_name, file_count, total_chunks = ingest_directory(request.file_path, request.collection_name)
             return {
                 "status": "success",
                 "message": "Documents ingested to Milvus Database successfully",
@@ -45,6 +47,7 @@ async def ingest_endpoint(request: IngestRequest):
 async def ask_endpoint(request: QuestionRequest):
     try:
         conversation_history = memory.get_history()
+        print('conversation_history: ', conversation_history)
         answer, top_5_chunks = get_answer_from_docs(
             request.question, request.collection_name, conversation_history
         )
