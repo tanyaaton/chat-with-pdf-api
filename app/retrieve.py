@@ -8,7 +8,6 @@ load_dotenv()
 GEMINI_KEY= os.getenv("GEMINI_KEY")
 OPENAI_API_KEY= os.getenv("OPENAI_API_KEY")
 
-connections.connect("default", host="localhost", port="19530")
 client = genai.Client(api_key=GEMINI_KEY)
 # collection = Collection(name='ahB8Qym2dsGjzoNI')
 

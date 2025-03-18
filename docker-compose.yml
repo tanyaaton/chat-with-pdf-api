@@ -54,6 +54,22 @@ services:
     depends_on:
       - "standalone"
 
+  api:
+    build: .
+    container_name: rag_api
+    ports:
+      - "7777:7777"
+    depends_on:
+      - standalone
+    volumes:
+      - .:/app
+      - ./papers:/app/app/papers
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GEMINI_KEY=${GEMINI_KEY}
+    networks:
+      - default
+
 networks:
   default:
     name: milvus

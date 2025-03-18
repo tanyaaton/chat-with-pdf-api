@@ -19,14 +19,12 @@ embeddings = OpenAIEmbeddings(
 )
 
 text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=800,
-        chunk_overlap=200,
+        chunk_size=1000,
+        chunk_overlap=300,
         length_function=len,
         is_separator_regex=False,
         )
 
-#connect to Milvus
-connections.connect("default", host="localhost", port="19530")
 
 def create_milvus_db(collection_name):
     item_id    = FieldSchema( name="id",         dtype=DataType.INT64,    is_primary=True, auto_id=True )
@@ -50,10 +48,11 @@ def load_and_split_pdfs(directory, filename, text_splitter):
     if filename.endswith(".pdf"):
         pdf_path = os.path.join(directory, filename)
         loader = PyPDFLoader(pdf_path)
-        pages = loader.load()  # Each page is a Document object
+        pages = loader.load()
 
         for page in pages:
-            chunks = text_splitter.split_text(page.page_content)
+            cleaned_text = page.page_content.replace("\n", " ")
+            chunks = text_splitter.split_text(cleaned_text)
             all_chunks.extend(chunks)
 
     return all_chunks

@@ -7,9 +7,11 @@ import uvicorn
 from ingest import ingest_directory
 from retrieve import get_answer_from_docs
 from memory import ConversationMemory
+from pymilvus import connections
 
 app = FastAPI(title="Chat with PDF", description="RAG application for PDF documents")
 memory = ConversationMemory()
+connections.connect("default", host="standalone", port="19530")
 
 # Request models
 class IngestRequest(BaseModel):
