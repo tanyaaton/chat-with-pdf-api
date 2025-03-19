@@ -22,7 +22,7 @@ class IngestRequest(BaseModel):
 class QuestionRequest(BaseModel):
     question: str
     collection_name: str = None
-    # llm_model: str = "gemini-2.0-flash"
+    llm_model: str = "gemini-2.0-flash"
     
 # API endpoints
 @app.post("/ingest")
@@ -67,7 +67,8 @@ async def clear_memory():
     memory.clear()
     return {
         "status": "success", 
-        "message": "Conversation memory cleared"
+        "message": "Conversation memory cleared",
+        "history": memory.get_history()
     }
 
 
