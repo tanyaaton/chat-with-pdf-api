@@ -154,8 +154,9 @@ To use standard text splitting:
 curl -X POST http://localhost:7777/ingest \
   -H "Content-Type: application/json" \
   -d '{
-    "file_path": "/app/papers", 
+    "file_path": "papers", 
     "is_directory": true,
+    "collection_name": "test_collection",
     "semantic_chunking": false
   }'
 ```
@@ -174,8 +175,9 @@ To use semantic chunking (default):
 curl -X POST http://localhost:7777/ingest \
   -H "Content-Type: application/json" \
   -d '{
-    "file_path": "/app/papers", 
+    "file_path": "papers", 
     "is_directory": true,
+    "collection_name": "test_collection"
     "semantic_chunking": true
   }'
 ```
@@ -209,8 +211,8 @@ curl -X POST http://localhost:7777/clear
   - Parameters:
     - `file_path`: String - Path to file or directory (use container paths)
     - `is_directory`: Boolean - Whether the path is a directory
-    - `collection_name`: String (optional) - Custom name for the Milvus collection
-    - `semantic_chunking`: Boolean (default: true) - Use Azure Document Intelligence for advanced document chunking
+    - `collection_name`: String (optional) - Custom name for the Milvus collection. If None is given, the collection name will be auto generated (eg. a1b2c3d4e5)
+    - `semantic_chunking`: Boolean (default: true) - Use Azure Document Intelligence for advanced document chunking and divide content based on semantic headers and sections
 
 - **POST /ask**: Query your documents
   - Parameters:
