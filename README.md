@@ -1,4 +1,4 @@
-# Chat-with-PDF API
+# 💬 Chat-with-PDF API
 
 A powerful RAG (Retrieval-Augmented Generation) system that enables conversational interactions with PDF documents. This API service leverages Milvus for vector storage, LangChain for document processing, Azure Document Intelligence for document structure and layout, and supports Google's Gemini LLM.
 
@@ -13,7 +13,7 @@ A powerful RAG (Retrieval-Augmented Generation) system that enables conversation
 - [Troubleshooting](#troubleshooting)
 - [Future Improvements](#future-improvements)
 
-## Architecture Overview
+## 🛠️ Architecture Overview
 
 This system follows a standard RAG (Retrieval-Augmented Generation) architecture:
 
@@ -34,7 +34,7 @@ This system follows a standard RAG (Retrieval-Augmented Generation) architecture
    - `retrieve.py`: Manages similarity search and context retrieval
    - `memory.py`: Maintains conversation history for contextual responses
 
-## Features
+## 📌 Features
 
 - **PDF Document Processing**: Automatically processes and indexes PDF documents
 - **Semantic Chunking**: Option to use Azure Document Intelligence for more intelligent document chunking
@@ -80,7 +80,7 @@ chat-with-pdf-api/
 - Google Gemini API key
 - Azure Document Intelligence API key and endpoint (optional, for semantic chunking)
 
-## Setup and Installation
+## ⚙️ Setup and Installation
 
 ### 1. Clone the Repository
 
@@ -135,7 +135,7 @@ Check if all containers are running properly:
 docker ps
 ```
 
-## Usage
+## 💌 Usage
 
 ### 1. Ingest Documents
 
@@ -220,7 +220,7 @@ curl -X POST http://localhost:7777/clear
 - **POST /clear**: Reset conversation history
   - No parameters required
 
-## Troubleshooting
+## ‼️ Troubleshooting
 
 - **Container Path Issues**: When ingesting files, use paths inside the container (e.g., `/app/papers`) not local machine paths
 - **Milvus Connection Errors**: Check if all Milvus-related containers are running properly
@@ -232,7 +232,7 @@ curl -X POST http://localhost:7777/clear
 - **Missing Embeddings**: Ensure your OpenAI API key has access to the embedding model
 - **Gemini Errors**: Confirm your Gemini API key is valid and has proper permissions
 
-## Future Improvements
+## 📊 Future Improvements
 
 1. **Ingestion Enhancements:**
    - Allow custom collection naming (currently uses random name as default)
