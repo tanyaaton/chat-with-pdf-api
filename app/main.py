@@ -18,6 +18,7 @@ class IngestRequest(BaseModel):
     file_path: str
     is_directory: bool = False
     collection_name: str = None
+    semantic_chunking: bool = True
 
 class QuestionRequest(BaseModel):
     question: str

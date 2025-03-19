@@ -6,18 +6,18 @@ from dotenv import load_dotenv
 from langchain_openai import OpenAIEmbeddings
 from langchain.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from semantic_chunking import process_with_loader, adjust_chunk_size, split_using_markdown
+from semantic_chunking import SemanticChunker
 
 
 load_dotenv()
 OPENAI_API_KEY= os.getenv("OPENAI_API_KEY")
 
-# OpenAI embedding 3B model
 embeddings = OpenAIEmbeddings(
     model="text-embedding-3-large",
     api_key=OPENAI_API_KEY,
-    # dimensions=1024
 )
+
+chunker = SemanticChunker()
 
 text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
@@ -35,19 +35,19 @@ def create_milvus_db(collection_name):
     collection = Collection( name=collection_name, schema=schema, using='default' )
     return collection
 
-# def load_and_split_pdfs(directory, filename, text_splitter):
-#     all_chunks = []
-#     if filename.endswith(".pdf"):
-#         pdf_path = os.path.join(directory, filename)
-#         loader = PyPDFLoader(pdf_path)
-#         pages = loader.load()
+def load_and_split_pdfs(directory, filename, text_splitter):
+    all_chunks = []
+    if filename.endswith(".pdf"):
+        pdf_path = os.path.join(directory, filename)
+        loader = PyPDFLoader(pdf_path)
+        pages = loader.load()
 
-#         for page in pages:
-#             cleaned_text = page.page_content.replace("\n", " ")
-#             chunks = text_splitter.split_text(cleaned_text)
-#             all_chunks.extend(chunks)
+        for page in pages:
+            cleaned_text = page.page_content.replace("\n", " ")
+            chunks = text_splitter.split_text(cleaned_text)
+            all_chunks.extend(chunks)
 
-#     return all_chunks
+    return all_chunks
 
 def embedding_and_store_data(chunks_list, collection_name, filename, model_emb):
     vector_list  = model_emb.embed_documents(chunks_list)
@@ -66,7 +66,7 @@ def initiate_collection_name():
     print('collection_name: ', collection_name)
     return collection_name
 
-def ingest_directory(directory, collection_name=None):
+def ingest_directory(directory, collection_name=None, semantic_chunking=True):
     if collection_name is None:
         collection_name = initiate_collection_name()
     create_milvus_db(collection_name)
@@ -77,14 +77,11 @@ def ingest_directory(directory, collection_name=None):
     for filename in os.listdir(directory):
         print('filename: ', filename)
         if filename.endswith(".pdf"):
-            docs = process_with_loader(directory+'/'+filename)
-            splits = split_using_markdown(docs)
-            chunks = adjust_chunk_size(splits)
-            # chunks = load_and_split_pdfs(directory, filename, text_splitter)
+            if semantic_chunking:
+                chunks = chunker.process_file(directory + '/' + filename)
+            else:
+                chunks = load_and_split_pdfs(directory, filename, text_splitter)
             collection = embedding_and_store_data(chunks, collection_name, filename, embeddings)
             file_count += 1
             total_chunks += len(chunks)
     return collection_name, file_count, total_chunks
-
-if __name__ == "__main__":
-    ingest_directory()
