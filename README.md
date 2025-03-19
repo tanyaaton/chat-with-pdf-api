@@ -1,6 +1,6 @@
 # Chat-with-PDF API
 
-A powerful RAG (Retrieval-Augmented Generation) system that enables conversational interactions with PDF documents. This API service leverages Milvus for vector storage, LangChain for document processing, and supports multiple LLM providers including OpenAI and Google's Gemini.
+A powerful RAG (Retrieval-Augmented Generation) system that enables conversational interactions with PDF documents. This API service leverages Milvus for vector storage, LangChain for document processing, Azure Document Intelligence for document structure and layout, and supports Google's Gemini LLM.
 
 ## Table of Contents
 - [Architecture Overview](#architecture-overview)
@@ -18,15 +18,15 @@ A powerful RAG (Retrieval-Augmented Generation) system that enables conversation
 This system follows a standard RAG (Retrieval-Augmented Generation) architecture:
 
 1. **Document Ingestion Pipeline**:
-   - PDF files are processed and split into manageable chunks
-   - Each chunk is converted into a vector embedding using OpenAI's `text-embedding-3-large` model
+   - PDF files are processed and split into manageable chunks using Azure Docment Intelligence
+   - Each chunk is converted into a vector embedding using OpenAI's text-embedding-3-large model
    - Embeddings are stored in Milvus vector database with metadata
 
 2. **Query Processing**:
    - User queries are converted to vector embeddings using the same model
    - Similar document chunks are retrieved from Milvus using vector similarity search
-   - Retrieved context is sent to LLM along with the query
-   - LLM (OpenAI or Gemini) generates a response based on the provided context
+   - Retrieved context is sent to LLM along with the query and past conversation history
+   - LLM (Gemini) generates a response based on the provided context
 
 3. **Core Components**:
    - `main.py`: FastAPI application with endpoints for querying and document ingestion
@@ -37,6 +37,8 @@ This system follows a standard RAG (Retrieval-Augmented Generation) architecture
 ## Features
 
 - **PDF Document Processing**: Automatically processes and indexes PDF documents
+- **Semantic Chunking**: Option to use Azure Document Intelligence for more intelligent document chunking
+- **Standard Text Splitting**: LangChain's RecursiveCharacterTextSplitter for basic document chunking
 - **Vector Search**: Utilizes Milvus for efficient similarity search
 - **Multiple LLM Support**: Compatible with both OpenAI and Google's Gemini models
 - **Conversation Memory**: Maintains context across multiple queries
@@ -76,13 +78,14 @@ chat-with-pdf-api/
 - Docker and Docker Compose
 - OpenAI API key
 - Google Gemini API key
+- Azure Document Intelligence API key and endpoint (optional, for semantic chunking)
 
 ## Setup and Installation
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/tanyaaton/chat-with-pdf-api.git
+git clone https://github.com/yourusername/chat-with-pdf-api.git
 cd chat-with-pdf-api
 ```
 
@@ -93,16 +96,15 @@ Create a `.env` file in the project root with the following variables:
 ```
 OPENAI_API_KEY=your-openai-api-key
 GEMINI_KEY=your-gemini-api-key
+AZURE_DOC_KEY=your-azure-document-intelligence-key
+AZURE_DOC_ENDPOINT=your-azure-document-intelligence-endpoint
 ```
+
+The Azure Document Intelligence credentials are required only if you plan to use the semantic chunking feature.
 
 ### 3. Prepare Your PDF Documents
 
-Add your PDF documents to the existing `papers` directory in the project root. This directory is already set up in the repository and mounted to the Docker container.:
-
-```bash
-# Copy your PDF files to the papers directory
-cp /path/to/your/documents/*.pdf papers/
-```
+Add your PDF documents to the existing `papers` directory in the project root. This directory is already set up in the repository and mounted to the Docker container.
 
 ### 4. Start the Services
 
@@ -137,28 +139,45 @@ docker ps
 
 ### 1. Ingest Documents
 
-To process and index your PDF documents:
+To process and index your PDF documents, the system provides two methods for splitting PDF documents into chunks:
+
+#### 1.1 Standard Text Splitting
+
+Uses LangChain's RecursiveCharacterTextSplitter to divide documents based on character count:
+- Simple but effective for clean, well-formatted documents
+- Configurable chunk size and overlap
+- No additional API requirements
+
+To use standard text splitting:
 
 ```bash
 curl -X POST http://localhost:7777/ingest \
   -H "Content-Type: application/json" \
-  -d '{"file_path": "/app/papers", "is_directory": true}'
+  -d '{
+    "file_path": "/app/papers", 
+    "is_directory": true,
+    "semantic_chunking": false
+  }'
 ```
 
-Note: Use the path `/app/papers` which is the mounted directory inside the container.
+#### 1.2. Semantic Chunking (Default)
 
-The API will return a response with the collection name, which you'll need for queries:
+Uses Azure Document Intelligence to intelligently chunk documents based on their semantic structure:
+- Maintains document structure (sections, headers, tables)
+- Preserves relationships between content elements
+- Better handles complex document layouts
+- Requires Azure Document Intelligence API credentials
 
-```json
-{
-  "status": "success",
-  "message": "Documents ingested to Milvus Database successfully",
-  "data": {
-    "collection_name": "a1b2c3d4e5",
-    "documents_processed": 5,
-    "total_chunks": 120
-  }
-}
+To use semantic chunking (default):
+
+```bash
+curl -X POST http://localhost:7777/ingest \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_path": "/app/papers", 
+    "is_directory": true,
+    "semantic_chunking": true
+  }'
 ```
 
 ### 2. Ask Questions About Your Documents
@@ -170,7 +189,7 @@ curl -X POST http://localhost:7777/ask \
   -H "Content-Type: application/json" \
   -d '{
     "question": "What are the main topics covered in these papers?", 
-    "collection_name": "a1b2c3d4e5"
+    "collection_name": "test_collection"
   }'
 ```
 
@@ -182,12 +201,16 @@ To reset the conversation context:
 curl -X POST http://localhost:7777/clear
 ```
 
+
+
 ## API Endpoints
 
 - **POST /ingest**: Process and index PDF documents
   - Parameters:
     - `file_path`: String - Path to file or directory (use container paths)
     - `is_directory`: Boolean - Whether the path is a directory
+    - `collection_name`: String (optional) - Custom name for the Milvus collection
+    - `semantic_chunking`: Boolean (default: true) - Use Azure Document Intelligence for advanced document chunking
 
 - **POST /ask**: Query your documents
   - Parameters:
@@ -202,6 +225,9 @@ curl -X POST http://localhost:7777/clear
 - **Container Path Issues**: When ingesting files, use paths inside the container (e.g., `/app/papers`) not local machine paths
 - **Milvus Connection Errors**: Check if all Milvus-related containers are running properly
   - Verify with `docker logs milvus-standalone`
+- **Azure Document Intelligence Errors**: 
+  - Ensure your Azure credentials are correct in the .env file
+  - Check if your Azure service has adequate quota for your document volume
 - **API Errors**: Check the logs with `docker logs rag_api` for detailed error messages
 - **Missing Embeddings**: Ensure your OpenAI API key has access to the embedding model
 - **Gemini Errors**: Confirm your Gemini API key is valid and has proper permissions
