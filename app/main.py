@@ -30,7 +30,7 @@ class QuestionRequest(BaseModel):
 async def ingest_endpoint(request: IngestRequest):
     try:
         if request.is_directory:
-            collection_name, file_count, total_chunks = ingest_directory(request.file_path, request.collection_name)
+            collection_name, file_count, total_chunks = ingest_directory(request.file_path, request.collection_name, request.semantic_chunking)
             return {
                 "status": "success",
                 "message": "Documents ingested to Milvus Database successfully",
