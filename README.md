@@ -85,7 +85,7 @@ chat-with-pdf-api/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/chat-with-pdf-api.git
+git clone https://github.com/tanyaaton/chat-with-pdf-api.git
 cd chat-with-pdf-api
 ```
 
