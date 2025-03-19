@@ -16,7 +16,10 @@ RUN pip install --no-cache-dir \
     langchain==0.3.20 \
     pypdf==5.3.1 \
     google-genai==1.5.0 \
-    langchain-community==0.3.19
+    langchain-community==0.3.19 \
+    azure-ai-documentintelligence==1.0.1 \
+    azure-ai-formrecognizer==3.3.3
+    
 
 # Expose FastAPI port
 EXPOSE 7777
