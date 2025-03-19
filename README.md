@@ -234,33 +234,29 @@ curl -X POST http://localhost:7777/clear
 
 ## Future Improvements
 
-1. **Enhanced Search Capabilities**:
-   - Implement hybrid search combining vector similarity with keyword matching
-   - Add metadata filtering options (date, author, etc.)
-   - Optimize chunk size and overlap for better context retrieval
+1. **Ingestion Enhancements:**
+   - Allow custom collection naming (currently uses random name as default)
+   - check for duplicate collection names before ingestion
+   - Add support for tracking documents by both directory and filename
 
-2. **Performance Optimizations**:
-   - Implement response caching for frequent queries
-   - Add batch processing for large document sets
-   - Optimize embedding model selection for speed/quality tradeoffs
+2. **LLM Integration Expansion:**
+   - Implement feature for selecting between different LLM providers (OpenAI, Gemini)
+   - Add support for additional models from each provider
+     
+3. **Querying**:
+   - Enable document-specific querying to target questions to particular documents
+   - Add festure for understanding Figures
 
-3. **Feature Additions**:
-   - Support for more document types (DOCX, TXT, HTML)
-   - Multi-user support with authentication
-   - Document collection management interface
-   - Streaming responses for better user experience
-   - Document source tracking and citation
+4. **Evaluation and Testing:**
+   - Implement RAGAS evaluation metrics to measure system performance (context recall, faithfulness, etc.)
 
-4. **UI Development**:
-   - Web interface for document upload and chatting
-   - Visualization for document similarity
-   - Dashboard for system monitoring
+5. **Feature Additions:**
+   -  Support for more document types (DOCX, TXT, HTML)
+   -  Multi-user support with authentication
+   -  Streaming responses for better user experience
 
-5. **Deployment Improvements**:
+6. **Deployment Improvements:**
    - Kubernetes configuration for scalable deployment
    - Monitoring and logging integrations
    - CI/CD pipeline setup
 
-## License
-
-[MIT License](LICENSE)
